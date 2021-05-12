@@ -1,6 +1,7 @@
 import os
 import glob
 import numpy as np
+import cv2
 
 import torch
 import torch.nn as nn
@@ -236,7 +237,24 @@ def video_mAP_ucf():
         print('iou is: ', iou_th)
         print(evaluate_videoAP(gt_videos, detected_boxes, CLASSES, iou_th, True))
 
-
+def expand_image(batch_clips, h, w):
+    b, c, clip, half_h, half_w = batch_clips.shape
+    batchs = []
+    for i in range(b):
+        clips = []
+        for j in range(clip):
+            img = batch_clips[i,:,j,:,:].permute(1,2,0).numpy()
+            resized = cv2.resize(img, ((w, h)), interpolation = cv2.INTER_AREA)
+            clips.append(resized)
+        batchs.append(clips)
+    batchs = torch.tensor(batchs).permute(0,4,1,2,3)
+    return batchs
+def crop_and_expand(batch_image):
+    b, c, clip, h, w = batch_image.shape
+    half_h, half_w = h // 2, w // 2
+    imgs = []
+    imgs.append(expand_image(batch_image[:,:,:,h//8:-h//2,w//8:-w//8], h, w))
+    return imgs
 
 def video_mAP_jhmdb():
     """
@@ -277,13 +295,21 @@ def video_mAP_jhmdb():
             path_split = img_name[0].split('/')
             if video_name == '':
                 video_name = os.path.join(path_split[0], path_split[1])
-
-            data = data.cuda()
+            
+            all_boxes = None
             with torch.no_grad():
-                data = Variable(data)
-                output = model(data).data
-                all_boxes = get_region_boxes_video(output, conf_thresh, num_classes, anchors, num_anchors, 0, 1)
-
+                datas= crop_and_expand(data) + [data]
+                for data in datas:
+                    data = data.cuda()
+                    data = Variable(data)
+                    output = model(data).data
+                    batch_boxes = get_region_boxes_video(output, conf_thresh, num_classes, anchors, num_anchors, 0, 1)
+                    if all_boxes is None:
+                        all_boxes = batch_boxes
+                    else:
+                        for i in range(len(batch_boxes)):
+                            all_boxes[i] += batch_boxes[i]
+                
                 for i in range(output.size(0)):
                     boxes = all_boxes[i]
                     boxes = nms(boxes, nms_thresh)
@@ -305,6 +331,9 @@ def video_mAP_jhmdb():
                             cls_boxes[b][1] = max(float(boxes[b][1]-boxes[b][3]/2.0) * 240.0, 0.0)
                             cls_boxes[b][2] = min(float(boxes[b][0]+boxes[b][2]/2.0) * 320.0, 320.0)
                             cls_boxes[b][3] = min(float(boxes[b][1]+boxes[b][3]/2.0) * 240.0, 240.0)
+                            #print(boxes[b])
+                            #print(5+(cls_idx-1)*2)
+                            #print(boxes[b][5+(cls_idx-1)*2])
                             cls_boxes[b][4] = float(boxes[b][5+(cls_idx-1)*2])
                         img_annotation[cls_idx] = cls_boxes
                     detected_boxes[img_name[0]] = img_annotation
