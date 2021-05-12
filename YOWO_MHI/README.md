@@ -17,7 +17,7 @@ python main.py --cfg cfg/jhmdb.yaml
 ## Validating the model
 
 ```bash
-python video_mAP.py --cfg cfg/ucf24.yaml
+python video_mAP.py --cfg cfg/jhmdb.yaml
 ```
 
 
