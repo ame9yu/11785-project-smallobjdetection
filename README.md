@@ -2,7 +2,7 @@
 Course project for 11785. Improving small object detection via data augmentation
 
 ## Transformed dataset
-All the data we use can be found [here](https://www.dropbox.com/sh/qk5om60vh0wj3et/AADT1mx0QqOIn9JaaAv4aULaa?dl=0).
+All the data and trained weights can be found [here](https://www.dropbox.com/sh/qk5om60vh0wj3et/AADT1mx0QqOIn9JaaAv4aULaa?dl=0).
 
 #### Padded frames
 JHMDB dataset images are padded such that the bounding boxes are shrinked to 32 x 32.
