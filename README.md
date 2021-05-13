@@ -1,5 +1,6 @@
 # 11785-project-smallobjdetection
 Course project for 11785. Improving small object detection via data augmentation
+The report can be found on [overleaf](https://www.overleaf.com/project/6046af9fbc7f7343cacd6a38).
 
 ## Transformed dataset
 All the data and trained weights can be found [here](https://www.dropbox.com/sh/qk5om60vh0wj3et/AADT1mx0QqOIn9JaaAv4aULaa?dl=0).
