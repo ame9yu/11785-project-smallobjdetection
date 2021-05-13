@@ -10,6 +10,8 @@ JHMDB dataset images are padded such that the bounding boxes are shrinked to 32 
 #### Motion History Information (MHI)
 MHI images are produced from JHMDB dataset. 
 
+#### Ground truths for "small" video
+
 ## Data folder structure
 The data folder should be organized as follows:
 ```
